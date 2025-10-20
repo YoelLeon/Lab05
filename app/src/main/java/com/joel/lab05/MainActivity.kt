@@ -3,9 +3,12 @@ package com.joel.lab05
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+<<<<<<< HEAD
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+=======
+>>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -61,20 +64,29 @@ fun AppNavigation() {
     var currentScreen by remember { mutableStateOf("welcome") }
 
     when (currentScreen) {
+<<<<<<< HEAD
         "welcome" -> WelcomeScreen(
             onNavigateToForm = { currentScreen = "form" },
             onNavigateToAnimation = { currentScreen = "animation" }
         )
         "form" -> AirQualityForm()
         "animation" -> AnimationLab() // NUEVA PANTALLA PARA LAB 06
+=======
+        "welcome" -> WelcomeScreen { currentScreen = "form" }
+        "form" -> AirQualityForm()
+>>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
     }
 }
 
 @Composable
+<<<<<<< HEAD
 fun WelcomeScreen(
     onNavigateToForm: () -> Unit,
     onNavigateToAnimation: () -> Unit
 ) {
+=======
+fun WelcomeScreen(onNavigateToForm: () -> Unit) {
+>>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -93,12 +105,22 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+<<<<<<< HEAD
             Image(
                 painter = painterResource(id = android.R.drawable.ic_menu_compass),
+=======
+            // Icono o imagen relacionada al aire (puedes agregar una imagen después)
+            Image(
+                painter = painterResource(id = android.R.drawable.ic_menu_compass), // Icono temporal
+>>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
                 contentDescription = "Icono de calidad del aire",
                 modifier = Modifier.size(120.dp)
             )
 
+<<<<<<< HEAD
+=======
+            // Título de bienvenida
+>>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "Bienvenido a",
@@ -117,6 +139,10 @@ fun WelcomeScreen(
                 )
             }
 
+<<<<<<< HEAD
+=======
+            // Descripción
+>>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
             Text(
                 text = "Monitoreo de la calidad del aire\nen Arequipa",
                 style = MaterialTheme.typography.bodyLarge,
@@ -126,7 +152,11 @@ fun WelcomeScreen(
                 lineHeight = 24.sp
             )
 
+<<<<<<< HEAD
             // Botón para ir al formulario
+=======
+            // Botón para continuar
+>>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
             Button(
                 onClick = onNavigateToForm,
                 modifier = Modifier
@@ -143,6 +173,7 @@ fun WelcomeScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
+<<<<<<< HEAD
 
             // NUEVO BOTÓN PARA LAB 06 - ANIMACIONES
             Button(
@@ -284,6 +315,8 @@ fun AnimationLab() {
                     Text("• Animación suave de 1 segundo")
                 }
             }
+=======
+>>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
         }
     }
 }
