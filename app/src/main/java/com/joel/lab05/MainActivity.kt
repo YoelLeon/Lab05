@@ -3,6 +3,9 @@ package com.joel.lab05
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -58,13 +61,20 @@ fun AppNavigation() {
     var currentScreen by remember { mutableStateOf("welcome") }
 
     when (currentScreen) {
-        "welcome" -> WelcomeScreen { currentScreen = "form" }
+        "welcome" -> WelcomeScreen(
+            onNavigateToForm = { currentScreen = "form" },
+            onNavigateToAnimation = { currentScreen = "animation" }
+        )
         "form" -> AirQualityForm()
+        "animation" -> AnimationLab() // NUEVA PANTALLA PARA LAB 06
     }
 }
 
 @Composable
-fun WelcomeScreen(onNavigateToForm: () -> Unit) {
+fun WelcomeScreen(
+    onNavigateToForm: () -> Unit,
+    onNavigateToAnimation: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -83,14 +93,12 @@ fun WelcomeScreen(onNavigateToForm: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
-            // Icono o imagen relacionada al aire (puedes agregar una imagen después)
             Image(
-                painter = painterResource(id = android.R.drawable.ic_menu_compass), // Icono temporal
+                painter = painterResource(id = android.R.drawable.ic_menu_compass),
                 contentDescription = "Icono de calidad del aire",
                 modifier = Modifier.size(120.dp)
             )
 
-            // Título de bienvenida
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "Bienvenido a",
@@ -109,7 +117,6 @@ fun WelcomeScreen(onNavigateToForm: () -> Unit) {
                 )
             }
 
-            // Descripción
             Text(
                 text = "Monitoreo de la calidad del aire\nen Arequipa",
                 style = MaterialTheme.typography.bodyLarge,
@@ -119,7 +126,7 @@ fun WelcomeScreen(onNavigateToForm: () -> Unit) {
                 lineHeight = 24.sp
             )
 
-            // Botón para continuar
+            // Botón para ir al formulario
             Button(
                 onClick = onNavigateToForm,
                 modifier = Modifier
@@ -135,6 +142,147 @@ fun WelcomeScreen(onNavigateToForm: () -> Unit) {
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
+            }
+
+            // NUEVO BOTÓN PARA LAB 06 - ANIMACIONES
+            Button(
+                onClick = onNavigateToAnimation,
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF9800), // Naranja para diferenciar
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Ver Animaciones",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+// NUEVA PANTALLA PARA LABORATORIO 06
+@Composable
+fun AnimationLab() {
+    var circleSize by remember { mutableStateOf(100.dp) }
+    val animatedSize by animateDpAsState(
+        targetValue = circleSize,
+        animationSpec = tween(durationMillis = 1000)
+    )
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFE8F5E8)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(32.dp)
+        ) {
+            Text(
+                text = "Laboratorio 06",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color(0xFF1B5E20)
+            )
+
+            Text(
+                text = "Animación de Indicador de Calidad",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFF2E7D32),
+                textAlign = TextAlign.Center
+            )
+
+            // CÍRCULO ANIMADO - IMPLEMENTACIÓN DEL LAB 06
+            Box(
+                modifier = Modifier
+                    .size(250.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(
+                    modifier = Modifier
+                        .size(animatedSize)
+                ) {
+                    drawCircle(
+                        color = Color(0xFF2E7D32),
+                        radius = size.minDimension / 2
+                    )
+                }
+            }
+
+            // CONTROLES PARA LA ANIMACIÓN
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "Controlar tamaño del indicador:",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color(0xFF1B5E20)
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = { circleSize = 50.dp },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFF44336) // Rojo - mala calidad
+                        )
+                    ) {
+                        Text("Pequeño\n(Mala)")
+                    }
+
+                    Button(
+                        onClick = { circleSize = 100.dp },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFF9800) // Naranja - regular
+                        )
+                    ) {
+                        Text("Normal\n(Regular)")
+                    }
+
+                    Button(
+                        onClick = { circleSize = 200.dp },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2E7D32) // Verde - buena calidad
+                        )
+                    ) {
+                        Text("Grande\n(Buena)")
+                    }
+                }
+            }
+
+            // INFORMACIÓN ADICIONAL
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "💡 Simulación de Calidad del Aire:",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color(0xFF1B5E20),
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("• Pequeño = Mala calidad")
+                    Text("• Normal = Calidad regular")
+                    Text("• Grande = Buena calidad")
+                    Text("• Animación suave de 1 segundo")
+                }
             }
         }
     }
