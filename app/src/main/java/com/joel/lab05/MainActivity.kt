@@ -3,15 +3,14 @@ package com.joel.lab05
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-<<<<<<< HEAD
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-=======
->>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,6 +24,46 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+// ESTRUCTURA DE DATOS PARA LAB 07 - LISTA DINÁMICA
+data class AirQualityRecord(
+    val id: Int,
+    val location: String,      // Primer elemento: Ubicación
+    val pm25: Double,          // Segundo elemento: PM2.5
+    val pm10: Double,          // Tercer elemento: PM10
+    val date: String,          // Cuarto elemento: Fecha
+    val qualityLevel: String   // Para el avatar/icono: "Buena", "Regular", "Mala"
+)
+    
+// FUNCIÓN PARA GENERAR DATOS DE EJEMPLO - 20+ REGISTROS
+fun generateSampleData(): List<AirQualityRecord> {
+    return listOf(
+        AirQualityRecord(1, "Cercado AQP", 8.5, 32.0, "2024-01-15", "Buena"),
+        AirQualityRecord(2, "Yanahuara", 15.2, 48.0, "2024-01-15", "Regular"),
+        AirQualityRecord(3, "Cayma", 25.7, 68.0, "2024-01-14", "Mala"),
+        AirQualityRecord(4, "Sachaca", 6.8, 28.0, "2024-01-14", "Buena"),
+        AirQualityRecord(5, "Hunter", 18.9, 55.0, "2024-01-13", "Regular"),
+        AirQualityRecord(6, "Mariano Melgar", 12.3, 42.0, "2024-01-13", "Buena"),
+        AirQualityRecord(7, "Miraflores", 22.1, 62.0, "2024-01-12", "Mala"),
+        AirQualityRecord(8, "Paucarpata", 9.7, 35.0, "2024-01-12", "Buena"),
+        AirQualityRecord(9, "Cerro Colorado", 16.8, 51.0, "2024-01-11", "Regular"),
+        AirQualityRecord(10, "Alto Selva Alegre", 28.4, 75.0, "2024-01-11", "Mala"),
+        AirQualityRecord(11, "Jacobo Hunter", 11.5, 38.0, "2024-01-10", "Buena"),
+        AirQualityRecord(12, "José Luis B. y R.", 19.3, 57.0, "2024-01-10", "Regular"),
+        AirQualityRecord(13, "Socabaya", 7.2, 30.0, "2024-01-09", "Buena"),
+        AirQualityRecord(14, "Umacollo", 14.6, 45.0, "2024-01-09", "Regular"),
+        AirQualityRecord(15, "Tingo", 26.8, 70.0, "2024-01-08", "Mala"),
+        AirQualityRecord(16, "Yura", 5.9, 25.0, "2024-01-08", "Buena"),
+        AirQualityRecord(17, "La Tomilla", 17.5, 53.0, "2024-01-07", "Regular"),
+        AirQualityRecord(18, "San Lázaro", 23.2, 65.0, "2024-01-07", "Mala"),
+        AirQualityRecord(19, "Vallecito", 10.1, 36.0, "2024-01-06", "Buena"),
+        AirQualityRecord(20, "Barrio Obrero", 20.7, 59.0, "2024-01-06", "Regular"),
+        AirQualityRecord(21, "Cono Norte", 29.5, 78.0, "2024-01-05", "Mala"),
+        AirQualityRecord(22, "Centro Histórico", 13.4, 44.0, "2024-01-05", "Regular"),
+        AirQualityRecord(23, "Zona Industrial", 31.2, 82.0, "2024-01-04", "Mala"),
+        AirQualityRecord(24, "Residencial", 8.9, 33.0, "2024-01-04", "Buena")
+    )
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,38 +103,32 @@ fun AppNavigation() {
     var currentScreen by remember { mutableStateOf("welcome") }
 
     when (currentScreen) {
-<<<<<<< HEAD
         "welcome" -> WelcomeScreen(
             onNavigateToForm = { currentScreen = "form" },
-            onNavigateToAnimation = { currentScreen = "animation" }
+            onNavigateToAnimation = { currentScreen = "animation" },
+            onNavigateToList = { currentScreen = "list" }
         )
         "form" -> AirQualityForm()
-        "animation" -> AnimationLab() // NUEVA PANTALLA PARA LAB 06
-=======
-        "welcome" -> WelcomeScreen { currentScreen = "form" }
-        "form" -> AirQualityForm()
->>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
+        "animation" -> AnimationLab()
+        "list" -> AirQualityList()
     }
 }
 
 @Composable
-<<<<<<< HEAD
 fun WelcomeScreen(
     onNavigateToForm: () -> Unit,
-    onNavigateToAnimation: () -> Unit
+    onNavigateToAnimation: () -> Unit,
+    onNavigateToList: () -> Unit
 ) {
-=======
-fun WelcomeScreen(onNavigateToForm: () -> Unit) {
->>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF4CAF50),    // Verde claro
-                        Color(0xFF2E7D32),    // Verde medio
-                        Color(0xFF1B5E20)     // Verde oscuro
+                        Color(0xFF4CAF50),
+                        Color(0xFF2E7D32),
+                        Color(0xFF1B5E20)
                     )
                 )
             ),
@@ -103,92 +136,88 @@ fun WelcomeScreen(onNavigateToForm: () -> Unit) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-<<<<<<< HEAD
             Image(
                 painter = painterResource(id = android.R.drawable.ic_menu_compass),
-=======
-            // Icono o imagen relacionada al aire (puedes agregar una imagen después)
-            Image(
-                painter = painterResource(id = android.R.drawable.ic_menu_compass), // Icono temporal
->>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
                 contentDescription = "Icono de calidad del aire",
-                modifier = Modifier.size(120.dp)
+                modifier = Modifier.size(100.dp)
             )
 
-<<<<<<< HEAD
-=======
-            // Título de bienvenida
->>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "Bienvenido a",
                     style = MaterialTheme.typography.headlineMedium,
                     color = Color.White,
-                    fontSize = 24.sp,
+                    fontSize = 22.sp,
                     textAlign = TextAlign.Center
                 )
                 Text(
                     text = "AirQuality AQP",
                     style = MaterialTheme.typography.headlineLarge,
                     color = Color.White,
-                    fontSize = 32.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
             }
 
-<<<<<<< HEAD
-=======
-            // Descripción
->>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
             Text(
                 text = "Monitoreo de la calidad del aire\nen Arequipa",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White,
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 textAlign = TextAlign.Center,
-                lineHeight = 24.sp
+                lineHeight = 20.sp
             )
 
-<<<<<<< HEAD
-            // Botón para ir al formulario
-=======
-            // Botón para continuar
->>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
             Button(
                 onClick = onNavigateToForm,
                 modifier = Modifier
                     .width(200.dp)
-                    .height(50.dp),
+                    .height(45.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
                     contentColor = Color(0xFF2E7D32)
                 )
             ) {
                 Text(
-                    text = "Comenzar",
-                    fontSize = 18.sp,
+                    text = "Nueva Medición",
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
-<<<<<<< HEAD
 
-            // NUEVO BOTÓN PARA LAB 06 - ANIMACIONES
             Button(
                 onClick = onNavigateToAnimation,
                 modifier = Modifier
                     .width(200.dp)
-                    .height(50.dp),
+                    .height(45.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFF9800), // Naranja para diferenciar
+                    containerColor = Color(0xFFFF9800),
                     contentColor = Color.White
                 )
             ) {
                 Text(
-                    text = "Ver Animaciones",
-                    fontSize = 18.sp,
+                    text = "Indicador Animado",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Button(
+                onClick = onNavigateToList,
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(45.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2196F3),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Ver Historial",
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -196,7 +225,176 @@ fun WelcomeScreen(onNavigateToForm: () -> Unit) {
     }
 }
 
-// NUEVA PANTALLA PARA LABORATORIO 06
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AirQualityForm() {
+    var location by remember { mutableStateOf("") }
+    var pm25 by remember { mutableStateOf("") }
+    var pm10 by remember { mutableStateOf("") }
+    var temperature by remember { mutableStateOf("") }
+    var humidity by remember { mutableStateOf("") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFE8F5E8))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "AirQuality AQP",
+                style = MaterialTheme.typography.titleLarge,
+                color = Color(0xFF1B5E20),
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Text(
+                    text = "Registro de Calidad del Aire",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = Color(0xFF1B5E20),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = location,
+                    onValueChange = { location = it },
+                    label = { Text("Ubicación en AQP") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        focusedBorderColor = Color(0xFF2E7D32),
+                        focusedLabelColor = Color(0xFF2E7D32)
+                    )
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = pm25,
+                        onValueChange = { pm25 = it },
+                        label = { Text("PM2.5 (μg/m³)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color(0xFF2E7D32),
+                            focusedLabelColor = Color(0xFF2E7D32)
+                        )
+                    )
+                    OutlinedTextField(
+                        value = pm10,
+                        onValueChange = { pm10 = it },
+                        label = { Text("PM10 (μg/m³)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color(0xFF2E7D32),
+                            focusedLabelColor = Color(0xFF2E7D32)
+                        )
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = temperature,
+                        onValueChange = { temperature = it },
+                        label = { Text("Temperatura (°C)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color(0xFF2E7D32),
+                            focusedLabelColor = Color(0xFF2E7D32)
+                        )
+                    )
+                    OutlinedTextField(
+                        value = humidity,
+                        onValueChange = { humidity = it },
+                        label = { Text("Humedad (%)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color(0xFF2E7D32),
+                            focusedLabelColor = Color(0xFF2E7D32)
+                        )
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            saveAirQualityData(location, pm25, pm10, temperature, humidity)
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2E7D32)
+                        )
+                    ) {
+                        Text("Guardar Datos")
+                    }
+                    Button(
+                        onClick = {
+                            location = ""
+                            pm25 = ""
+                            pm10 = ""
+                            temperature = ""
+                            humidity = ""
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1976D2)
+                        )
+                    ) {
+                        Text("Limpiar")
+                    }
+                }
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "📊 Indicadores de Calidad del Aire:",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color(0xFF1B5E20),
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("• PM2.5: < 12 μg/m³ (Óptimo)")
+                Text("• PM10: < 54 μg/m³ (Óptimo)")
+                Text("• Temperatura: 15-25°C (Confortable)")
+                Text("• Humedad: 40-60% (Ideal)")
+            }
+        }
+    }
+}
+
 @Composable
 fun AnimationLab() {
     var circleSize by remember { mutableStateOf(100.dp) }
@@ -229,7 +427,6 @@ fun AnimationLab() {
                 textAlign = TextAlign.Center
             )
 
-            // CÍRCULO ANIMADO - IMPLEMENTACIÓN DEL LAB 06
             Box(
                 modifier = Modifier
                     .size(250.dp),
@@ -246,7 +443,6 @@ fun AnimationLab() {
                 }
             }
 
-            // CONTROLES PARA LA ANIMACIÓN
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -265,7 +461,7 @@ fun AnimationLab() {
                         onClick = { circleSize = 50.dp },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFF44336) // Rojo - mala calidad
+                            containerColor = Color(0xFFF44336)
                         )
                     ) {
                         Text("Pequeño\n(Mala)")
@@ -275,7 +471,7 @@ fun AnimationLab() {
                         onClick = { circleSize = 100.dp },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFFF9800) // Naranja - regular
+                            containerColor = Color(0xFFFF9800)
                         )
                     ) {
                         Text("Normal\n(Regular)")
@@ -285,7 +481,7 @@ fun AnimationLab() {
                         onClick = { circleSize = 200.dp },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2E7D32) // Verde - buena calidad
+                            containerColor = Color(0xFF2E7D32)
                         )
                     ) {
                         Text("Grande\n(Buena)")
@@ -293,7 +489,6 @@ fun AnimationLab() {
                 }
             }
 
-            // INFORMACIÓN ADICIONAL
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -315,191 +510,161 @@ fun AnimationLab() {
                     Text("• Animación suave de 1 segundo")
                 }
             }
-=======
->>>>>>> 819fec82cd3c9490d93a70e4e419a405c0807599
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AirQualityForm() {
-    var location by remember { mutableStateOf("") }
-    var pm25 by remember { mutableStateOf("") }
-    var pm10 by remember { mutableStateOf("") }
-    var temperature by remember { mutableStateOf("") }
-    var humidity by remember { mutableStateOf("") }
+fun AirQualityList() {
+    val records = remember { generateSampleData() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFE8F5E8))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFE8F5E8)
     ) {
-        // Header con título y botón de volver
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF2E7D32))
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Historial de Calidad del Aire",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "${records.size} registros en Arequipa",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(records) { record ->
+                    AirQualityItem(record = record)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AirQualityItem(record: AirQualityRecord) {
+    val cardColor = when (record.qualityLevel) {
+        "Buena" -> Color(0xFFE8F5E8)
+        "Regular" -> Color(0xFFFFF8E1)
+        "Mala" -> Color(0xFFFFEBEE)
+        else -> Color.White
+    }
+
+    val textColor = when (record.qualityLevel) {
+        "Buena" -> Color(0xFF2E7D32)
+        "Regular" -> Color(0xFFF57C00)
+        "Mala" -> Color(0xFFD32F2F)
+        else -> Color(0xFF1B5E20)
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = cardColor)
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "AirQuality AQP",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF1B5E20),
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        // Tarjeta principal del formulario
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
-        ) {
             Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = "Registro de Calidad del Aire",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color(0xFF1B5E20),
-                    modifier = Modifier.fillMaxWidth()
+                val iconRes = when (record.qualityLevel) {
+                    "Buena" -> android.R.drawable.presence_online
+                    "Regular" -> android.R.drawable.presence_away
+                    "Mala" -> android.R.drawable.presence_busy
+                    else -> android.R.drawable.presence_online
+                }
+
+                Image(
+                    painter = painterResource(id = iconRes),
+                    contentDescription = "Calidad ${record.qualityLevel}",
+                    modifier = Modifier.size(32.dp)
                 )
 
-                // Ubicación
-                OutlinedTextField(
-                    value = location,
-                    onValueChange = { location = it },
-                    label = { Text("Ubicación en AQP") },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF2E7D32),
-                        focusedLabelColor = Color(0xFF2E7D32)
-                    )
-                )
-
-                // PM2.5 y PM10
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedTextField(
-                        value = pm25,
-                        onValueChange = { pm25 = it },
-                        label = { Text("PM2.5 (μg/m³)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            focusedLabelColor = Color(0xFF2E7D32)
-                        )
-                    )
-                    OutlinedTextField(
-                        value = pm10,
-                        onValueChange = { pm10 = it },
-                        label = { Text("PM10 (μg/m³)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            focusedLabelColor = Color(0xFF2E7D32)
-                        )
-                    )
-                }
-
-                // Temperatura y Humedad
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedTextField(
-                        value = temperature,
-                        onValueChange = { temperature = it },
-                        label = { Text("Temperatura (°C)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            focusedLabelColor = Color(0xFF2E7D32)
-                        )
-                    )
-                    OutlinedTextField(
-                        value = humidity,
-                        onValueChange = { humidity = it },
-                        label = { Text("Humedad (%)") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            focusedLabelColor = Color(0xFF2E7D32)
-                        )
-                    )
-                }
-
-                // Botones
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            // Acción para guardar datos
-                            saveAirQualityData(location, pm25, pm10, temperature, humidity)
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2E7D32)
-                        )
-                    ) {
-                        Text("Guardar Datos")
-                    }
-                    Button(
-                        onClick = {
-                            location = ""
-                            pm25 = ""
-                            pm10 = ""
-                            temperature = ""
-                            humidity = ""
-                        },
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF1976D2)
-                        )
-                    ) {
-                        Text("Limpiar")
-                    }
-                }
-            }
-        }
-
-        // Información adicional
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
                 Text(
-                    text = "📊 Indicadores de Calidad del Aire:",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color(0xFF1B5E20),
+                    text = record.qualityLevel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = textColor,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("• PM2.5: < 12 μg/m³ (Óptimo)")
-                Text("• PM10: < 54 μg/m³ (Óptimo)")
-                Text("• Temperatura: 15-25°C (Confortable)")
-                Text("• Humedad: 40-60% (Ideal)")
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    text = record.location,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = textColor,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "PM2.5: ${record.pm25} μg/m³",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF666666),
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+
+                Text(
+                    text = "PM10: ${record.pm10} μg/m³",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF666666)
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = record.date,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF888888)
+                )
+                Text(
+                    text = "ID: ${record.id}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFF888888),
+                    modifier = Modifier.padding(top = 2.dp)
+                )
             }
         }
     }
 }
 
-// Función para guardar datos (simulada)
 fun saveAirQualityData(
     location: String,
     pm25: String,
@@ -507,6 +672,5 @@ fun saveAirQualityData(
     temperature: String,
     humidity: String
 ) {
-    // Aquí implementarías la lógica para guardar en base de datos
     println("Datos guardados: $location, PM2.5: $pm25, PM10: $pm10")
 }
