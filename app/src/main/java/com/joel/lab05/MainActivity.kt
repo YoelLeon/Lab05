@@ -3,11 +3,13 @@ package com.joel.lab05
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,18 +26,23 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material3.MaterialTheme
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
 // ESTRUCTURA DE DATOS PARA LAB 07 - LISTA DINÁMICA
 data class AirQualityRecord(
     val id: Int,
-    val location: String,      // Primer elemento: Ubicación
-    val pm25: Double,          // Segundo elemento: PM2.5
-    val pm10: Double,          // Tercer elemento: PM10
-    val date: String,          // Cuarto elemento: Fecha
-    val qualityLevel: String   // Para el avatar/icono: "Buena", "Regular", "Mala"
+    val location: String,
+    val pm25: Double,
+    val pm10: Double,
+    val date: String,
+    val qualityLevel: String
 )
-    
-// FUNCIÓN PARA GENERAR DATOS DE EJEMPLO - 20+ REGISTROS
+
+// FUNCIÓN PARA GENERAR DATOS DE EJEMPLO
 fun generateSampleData(): List<AirQualityRecord> {
     return listOf(
         AirQualityRecord(1, "Cercado AQP", 8.5, 32.0, "2024-01-15", "Buena"),
@@ -66,51 +73,79 @@ fun generateSampleData(): List<AirQualityRecord> {
 }
 
 class MainActivity : ComponentActivity() {
+    private val themeViewModel: ThemeViewModel by viewModels {
+        ThemeViewModelFactory(ThemeManager(this))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Lab05Theme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    AppNavigation()
-                }
-            }
+            AppNavigation(themeViewModel = themeViewModel)
         }
     }
 }
 
 @Composable
-fun Lab05Theme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = lightColorScheme(
-            primary = Color(0xFF2E7D32),      // Verde ambiental
-            secondary = Color(0xFF1976D2),    // Azul cielo
-            background = Color(0xFFE8F5E8),   // Verde muy claro de fondo
-            surface = Color(0xFFFFFFFF),      // Blanco para superficies
+fun Lab05Theme(
+    darkTheme: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = if (darkTheme) {
+        darkColorScheme(
+            primary = Color(0xFF4CAF50),
+            secondary = Color(0xFF2196F3),
+            background = Color(0xFF121212),
+            surface = Color(0xFF1E1E1E),
             onPrimary = Color.White,
             onSecondary = Color.White,
-            onBackground = Color(0xFF1B5E20), // Verde oscuro para texto
+            onBackground = Color(0xFFE0E0E0),
+            onSurface = Color(0xFFE0E0E0)
+        )
+    } else {
+        lightColorScheme(
+            primary = Color(0xFF2E7D32),
+            secondary = Color(0xFF1976D2),
+            background = Color(0xFFE8F5E8),
+            surface = Color(0xFFFFFFFF),
+            onPrimary = Color.White,
+            onSecondary = Color.White,
+            onBackground = Color(0xFF1B5E20),
             onSurface = Color(0xFF1B5E20)
-        ),
+        )
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
         content = content
     )
 }
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(themeViewModel: ThemeViewModel) {
     var currentScreen by remember { mutableStateOf("welcome") }
+    val isDarkTheme by themeViewModel.isDarkTheme.collectAsState(initial = false)
 
-    when (currentScreen) {
-        "welcome" -> WelcomeScreen(
-            onNavigateToForm = { currentScreen = "form" },
-            onNavigateToAnimation = { currentScreen = "animation" },
-            onNavigateToList = { currentScreen = "list" }
-        )
-        "form" -> AirQualityForm()
-        "animation" -> AnimationLab()
-        "list" -> AirQualityList()
+    Lab05Theme(darkTheme = isDarkTheme) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            when (currentScreen) {
+                "welcome" -> WelcomeScreen(
+                    onNavigateToForm = { currentScreen = "form" },
+                    onNavigateToAnimation = { currentScreen = "animation" },
+                    onNavigateToList = { currentScreen = "list" },
+                    onNavigateToSettings = { currentScreen = "theme_settings" }
+                )
+                "form" -> AirQualityForm()
+                "animation" -> AnimationLab()
+                "list" -> AirQualityList()
+                "theme_settings" -> ThemeSettingsScreen(
+                    themeViewModel = themeViewModel,
+                    onBack = { currentScreen = "welcome" }
+                )
+            }
+        }
     }
 }
 
@@ -118,7 +153,8 @@ fun AppNavigation() {
 fun WelcomeScreen(
     onNavigateToForm: () -> Unit,
     onNavigateToAnimation: () -> Unit,
-    onNavigateToList: () -> Unit
+    onNavigateToList: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -221,6 +257,23 @@ fun WelcomeScreen(
                     fontWeight = FontWeight.Bold
                 )
             }
+
+            Button(
+                onClick = onNavigateToSettings,
+                modifier = Modifier
+                    .width(200.dp)
+                    .height(45.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF9C27B0),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = "Configuración",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -237,7 +290,7 @@ fun AirQualityForm() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFE8F5E8))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
@@ -249,7 +302,7 @@ fun AirQualityForm() {
             Text(
                 text = "AirQuality AQP",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF1B5E20),
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -257,7 +310,7 @@ fun AirQualityForm() {
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
@@ -266,7 +319,7 @@ fun AirQualityForm() {
                 Text(
                     text = "Registro de Calidad del Aire",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = Color(0xFF1B5E20),
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -276,8 +329,8 @@ fun AirQualityForm() {
                     label = { Text("Ubicación en AQP") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color(0xFF2E7D32),
-                        focusedLabelColor = Color(0xFF2E7D32)
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary
                     )
                 )
 
@@ -292,8 +345,8 @@ fun AirQualityForm() {
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            focusedLabelColor = Color(0xFF2E7D32)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
                     OutlinedTextField(
@@ -303,8 +356,8 @@ fun AirQualityForm() {
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            focusedLabelColor = Color(0xFF2E7D32)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
@@ -320,8 +373,8 @@ fun AirQualityForm() {
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            focusedLabelColor = Color(0xFF2E7D32)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
                     OutlinedTextField(
@@ -331,8 +384,8 @@ fun AirQualityForm() {
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2E7D32),
-                            focusedLabelColor = Color(0xFF2E7D32)
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
@@ -347,7 +400,7 @@ fun AirQualityForm() {
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2E7D32)
+                            containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
                         Text("Guardar Datos")
@@ -362,7 +415,7 @@ fun AirQualityForm() {
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF1976D2)
+                            containerColor = MaterialTheme.colorScheme.secondary
                         )
                     ) {
                         Text("Limpiar")
@@ -374,7 +427,7 @@ fun AirQualityForm() {
         Card(
             modifier = Modifier.fillMaxWidth(),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
@@ -382,19 +435,18 @@ fun AirQualityForm() {
                 Text(
                     text = "📊 Indicadores de Calidad del Aire:",
                     style = MaterialTheme.typography.labelLarge,
-                    color = Color(0xFF1B5E20),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("• PM2.5: < 12 μg/m³ (Óptimo)")
-                Text("• PM10: < 54 μg/m³ (Óptimo)")
-                Text("• Temperatura: 15-25°C (Confortable)")
-                Text("• Humedad: 40-60% (Ideal)")
+                Text("• PM2.5: < 12 μg/m³ (Óptimo)", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("• PM10: < 54 μg/m³ (Óptimo)", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("• Temperatura: 15-25°C (Confortable)", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("• Humedad: 40-60% (Ideal)", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
 }
-
 @Composable
 fun AnimationLab() {
     var circleSize by remember { mutableStateOf(100.dp) }
@@ -403,9 +455,14 @@ fun AnimationLab() {
         animationSpec = tween(durationMillis = 1000)
     )
 
+    // Usar colores fijos para evitar el problema con MaterialTheme
+    val backgroundColor = Color(0xFFE8F5E8)
+    val textColor = Color(0xFF1B5E20)
+    val circleColor = Color(0xFF2E7D32)
+
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFE8F5E8)
+        color = backgroundColor
     ) {
         Column(
             modifier = Modifier
@@ -417,13 +474,13 @@ fun AnimationLab() {
             Text(
                 text = "Laboratorio 06",
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color(0xFF1B5E20)
+                color = textColor
             )
 
             Text(
                 text = "Animación de Indicador de Calidad",
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFF2E7D32),
+                color = circleColor,
                 textAlign = TextAlign.Center
             )
 
@@ -437,7 +494,7 @@ fun AnimationLab() {
                         .size(animatedSize)
                 ) {
                     drawCircle(
-                        color = Color(0xFF2E7D32),
+                        color = circleColor,
                         radius = size.minDimension / 2
                     )
                 }
@@ -450,7 +507,7 @@ fun AnimationLab() {
                 Text(
                     text = "Controlar tamaño del indicador:",
                     style = MaterialTheme.typography.labelLarge,
-                    color = Color(0xFF1B5E20)
+                    color = textColor
                 )
 
                 Row(
@@ -492,7 +549,7 @@ fun AnimationLab() {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE0E0E0))
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -500,14 +557,14 @@ fun AnimationLab() {
                     Text(
                         text = "💡 Simulación de Calidad del Aire:",
                         style = MaterialTheme.typography.labelLarge,
-                        color = Color(0xFF1B5E20),
+                        color = textColor,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("• Pequeño = Mala calidad")
-                    Text("• Normal = Calidad regular")
-                    Text("• Grande = Buena calidad")
-                    Text("• Animación suave de 1 segundo")
+                    Text("• Pequeño = Mala calidad", color = textColor)
+                    Text("• Normal = Calidad regular", color = textColor)
+                    Text("• Grande = Buena calidad", color = textColor)
+                    Text("• Animación suave de 1 segundo", color = textColor)
                 }
             }
         }
@@ -520,7 +577,7 @@ fun AirQualityList() {
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFE8F5E8)
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -530,7 +587,7 @@ fun AirQualityList() {
                     .fillMaxWidth()
                     .padding(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF2E7D32))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -539,13 +596,12 @@ fun AirQualityList() {
                     Text(
                         text = "Historial de Calidad del Aire",
                         style = MaterialTheme.typography.headlineMedium,
-                        color = Color.White,
-                        textAlign = TextAlign.Center
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Text(
                         text = "${records.size} registros en Arequipa",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.9f),
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
@@ -567,18 +623,12 @@ fun AirQualityList() {
 
 @Composable
 fun AirQualityItem(record: AirQualityRecord) {
-    val cardColor = when (record.qualityLevel) {
-        "Buena" -> Color(0xFFE8F5E8)
-        "Regular" -> Color(0xFFFFF8E1)
-        "Mala" -> Color(0xFFFFEBEE)
-        else -> Color.White
-    }
-
-    val textColor = when (record.qualityLevel) {
-        "Buena" -> Color(0xFF2E7D32)
-        "Regular" -> Color(0xFFF57C00)
-        "Mala" -> Color(0xFFD32F2F)
-        else -> Color(0xFF1B5E20)
+    // Colores fijos sin MaterialTheme
+    val (cardColor, textColor) = when (record.qualityLevel) {
+        "Buena" -> Pair(Color(0xFFE8F5E8), Color(0xFF2E7D32))
+        "Regular" -> Pair(Color(0xFFFFF8E1), Color(0xFFF57C00))
+        "Mala" -> Pair(Color(0xFFFFEBEE), Color(0xFFD32F2F))
+        else -> Pair(Color(0xFFF5F5F5), Color(0xFF212121))
     }
 
     Card(
@@ -652,14 +702,164 @@ fun AirQualityItem(record: AirQualityRecord) {
                 Text(
                     text = record.date,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF888888)
+                    color = Color(0xFF666666)
                 )
                 Text(
                     text = "ID: ${record.id}",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF888888),
+                    color = Color(0xFF666666),
                     modifier = Modifier.padding(top = 2.dp)
                 )
+            }
+        }
+    }
+}
+@Composable
+fun ThemeSettingsScreen(
+    themeViewModel: ThemeViewModel,
+    onBack: () -> Unit
+) {
+    val isDarkTheme by themeViewModel.isDarkTheme.collectAsState(initial = false)
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        painter = painterResource(id = android.R.drawable.ic_menu_revert),
+                        contentDescription = "Volver",
+                        tint = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                Text(
+                    text = "Configuración de Tema",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+
+            // Theme Selection Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Seleccionar Tema",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Light Theme Option
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { themeViewModel.setDarkTheme(false) }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_menu_day),
+                            contentDescription = "Tema claro",
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Tema Claro",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .padding(start = 16.dp)
+                                .weight(1f)
+                        )
+                        if (!isDarkTheme) {
+                            Icon(
+                                painter = painterResource(id = android.R.drawable.checkbox_on_background),
+                                contentDescription = "Seleccionado",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    Divider()
+
+                    // Dark Theme Option
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { themeViewModel.setDarkTheme(true) }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = android.R.drawable.ic_lock_idle_lock),
+                            contentDescription = "Tema oscuro",
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Tema Oscuro",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .padding(start = 16.dp)
+                                .weight(1f)
+                        )
+                        if (isDarkTheme) {
+                            Icon(
+                                painter = painterResource(id = android.R.drawable.checkbox_on_background),
+                                contentDescription = "Seleccionado",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Preview Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Vista Previa",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Esta es una vista previa de cómo se verá la aplicación con el tema seleccionado.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Tema actual: ${if (isDarkTheme) "Oscuro" else "Claro"}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }
